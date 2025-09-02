@@ -19,6 +19,7 @@ $solutions = [System.Collections.ArrayList]::new()
 #$startSequence = '111 421'
 #$startSequence = '111 421 142 223 223'
 #$startSequence = '421 111 142 223 232 214 322 214 111 223'
+$startSequence = '421 111 142'
 
 # Dimensions of the box
 $boxXSize = 5
@@ -153,7 +154,7 @@ $sw.Start()
 
 Get-Date; while ($shape) {
     $counter++
-#    if (-not ($counter % 30)) {Read-Host 'Pausing'}
+#    if (-not ($counter % 10)) {Read-Host 'Pausing'}
     $sequence.Add($shape) | Out-Null
 
     for ($i = 0; $i -lt $orientations.Count; $i++) {
@@ -163,7 +164,7 @@ Get-Date; while ($shape) {
     }
 
     if (Test-Sequence) {
-#        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4,-68}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Green
+#        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Green
         if ($sequence.Count -eq 17) {
             $solutions.Add(
                 [PSCustomObject]@{
@@ -173,13 +174,13 @@ Get-Date; while ($shape) {
                 }
             ) | Out-Null
             $solutions | Export-Csv -NoTypeInformation -Append -Encoding ASCII -Path .\solutions.csv
-            Write-Host ("{0,3}{1,12}{2,4}{3,3} {4,-68}{5}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' '), (Get-Date)) -ForegroundColor Green
+            Write-Host ("{0,3}{1,12}{2,4}{3,3} {4} {5}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' '), (Get-Date)) -ForegroundColor Green
             $sequence.RemoveAt($sequence.Count - 1)
         } else {
             $shape = '000'
         }
     } else {
-#        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4,-68}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Yellow
+#        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Yellow
         $sequence.RemoveAt($sequence.Count - 1)
     }
 
@@ -188,7 +189,7 @@ Get-Date; while ($shape) {
         for ($i = 0; $i -lt $orientations.Count; $i++) {
             if ($shape -in $orientations[$i]) {$pieces[$i]++}
         }
-#        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4,-68}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Red
+#        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Red
 
         if (-not ($next = Get-NextPiece $shape)) {
             $shape = $sequence[-1]

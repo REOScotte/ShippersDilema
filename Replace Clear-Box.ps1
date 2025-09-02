@@ -1,4 +1,4 @@
-﻿# New indexing - not faster
+﻿# Replacing Clear-Box - not faster
 
 ###### Configureation Here ######
 
@@ -9,8 +9,7 @@
 $solutions = [System.Collections.ArrayList]::new()
 
 # Sequence to begin with. Start with empty string to begin at the beginning.
-$startSequence = ''
-$startSequence = '25421 00111 21142'
+$startSequence = '421 111 142'
 
 # Dimensions of the box
 $boxXSize = 5
@@ -22,23 +21,25 @@ $pieces = @(5, 6, 6)
 
 # The possible orientations for each piece. Must be in the same order as $pieces
 $orientations = @(
-    ,@('00111')
-    ,@('10223', '11232', '12322')
-    ,@('20124', '21142', '22214', '23241', '24412', '25421')
+    ,@('111')
+    ,@('223', '232', '322')
+    ,@('124', '142', '214', '241', '412', '421')
 )
 ###### End Configuration ######
 
 # Build the box
-$box = New-Object 'object[,,]' $boxXSize, $boxYSize, $boxZSize
+$global:box = New-Object 'object[,,]' $boxXSize, $boxYSize, $boxZSize
 
 # Build the current sequence by adding the start pieces
 $sequence = [System.Collections.ArrayList]::new()
 
 $startPieces = $startSequence.Split(' ')
-if ($startPieces) {
-    foreach ($startPiece in $startPieces) {
-        $pieces[[int][string]$startPiece[0]]--
-        $sequence.Add($startPiece) | Out-Null
+foreach ($startPiece in $startPieces) {
+    for ($i = 0; $i -lt $orientations.Count; $i++) {
+        if ($startPiece -in $orientations[$i]) {
+            $pieces[$i]--
+            $sequence.Add($startPiece) | Out-Null
+        }
     }
 }
 
@@ -48,7 +49,9 @@ if ($sequence) {
     $sequence.RemoveAt($sequence.Count - 1)
 
     # Put it back
-    $pieces[[int][string]$shape[0]]++
+    for ($i = 0; $i -lt $orientations.Count; $i++) {
+        if ($shape -in $orientations[$i]) {$pieces[$i]++}
+    }
 } else {
     $shape = $orientations[0][0]
 }
@@ -61,7 +64,7 @@ function Clear-Box {
             $y = $_
             0..($boxXSize - 1) | ForEach-Object {
                 $x = $_
-                $box[$x, $y, $z] = 0
+                $global:box[$x, $y, $z] = 0
             }
         }    
     }
@@ -73,7 +76,7 @@ function Show-Box {
     for ($z = ($boxZSize - 1); $z -ge 0; $z--) {
         for ($y = ($boxYSize - 1); $y -ge 0; $y--) {
             $(for ($x = 0; $x -lt $boxXSize; $x++) {
-                $box[$x, $y, $z]
+                $global:box[$x, $y, $z]
             }) -join ''
         }
         '-' * $boxXSize
@@ -85,7 +88,7 @@ function Get-NextEmptyCoordinates {
     for ($z = 0; $z -lt $boxZSize; $z++) {
         for ($y = 0; $y -lt $boxYSize; $y++) {
             for ($x = 0; $x -lt $boxXSize; $x++) {
-                if ($box[$x, $y, $z] -eq 0) {
+                if ($global:box[$x, $y, $z] -eq 0) {
                     return $x, $y, $z
                 }
             }
@@ -96,15 +99,16 @@ function Get-NextEmptyCoordinates {
 # Try and add a piece to the current box.
 function Place-Piece ([string]$p) {
     $ex, $ey, $ez = Get-NextEmptyCoordinates
-    $px = [int]$p.Substring(2, 1)
-    $py = [int]$p.Substring(3, 1)
-    $pz = [int]$p.Substring(4, 1)
+    $px = [int]$p.Substring(0, 1)
+    $py = [int]$p.Substring(1, 1)
+    $pz = [int]$p.Substring(2, 1)
 
     for ($z = $ez; $z -lt $ez + $pz; $z++) {
         for ($y = $ey; $y -lt $ey + $py; $y++) {
             for ($x = $ex; $x -lt $ex + $px; $x++) {
-                if ($box[$x, $y, $z] -eq 0) {
-                    $box[$x, $y, $z] = 1
+                if ($global:box[$x, $y, $z] -ne 1) {
+                    if ($x -ge $boxXSize -or $y -ge $boxYSize -or $z -ge $boxZSize) { return $false }
+                    $global:box[$x, $y, $z] = 1
                 } else {
                     return $false
                 }
@@ -117,6 +121,7 @@ function Place-Piece ([string]$p) {
 # See if the current sequece will fit in a box, starting empty
 function Test-Sequence {
     Clear-Box
+#    $global:box = New-Object 'object[,,]' $boxXSize, $boxYSize, $boxZSize
     foreach ($piece in $sequence) {
         if (-not (Place-Piece $piece)) {
             return $false
@@ -126,7 +131,7 @@ function Test-Sequence {
 }
 
 function Get-NextPiece ($p) {
-    [array]$availableOrientations = for ($i = 0; $i -lt $pieces.Count; $i++) {
+    [array]$availableOrientations =  for ($i = 0; $i -lt $pieces.Count; $i++) {
         if ($pieces[$i] -ne 0) {
             $orientations[$i]
         }
@@ -141,11 +146,14 @@ $sw.Start()
 
 Get-Date; while ($shape) {
     $counter++
-#    if (-not ($counter % 10)) {Read-Host 'Pausing'}
+#    if (-not ($counter % 30)) {Read-Host 'Pausing'}
     $sequence.Add($shape) | Out-Null
 
-    # Take the piece
-    $pieces[[int][string]$shape[0]]--
+    for ($i = 0; $i -lt $orientations.Count; $i++) {
+        if ($shape -in $orientations[$i]) {
+            $pieces[$i]--
+        }
+    }
 
     if (Test-Sequence) {
 #        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Green
@@ -161,7 +169,7 @@ Get-Date; while ($shape) {
             Write-Host ("{0,3}{1,12}{2,4}{3,3} {4} {5}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' '), (Get-Date)) -ForegroundColor Green
             $sequence.RemoveAt($sequence.Count - 1)
         } else {
-            $shape = '00000'
+            $shape = '000'
         }
     } else {
 #        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Yellow
@@ -170,8 +178,8 @@ Get-Date; while ($shape) {
 
     do {
         # Put it back
-        if ($shape -ne '00000') {
-            $pieces[[int][string]$shape[0]]++
+        for ($i = 0; $i -lt $orientations.Count; $i++) {
+            if ($shape -in $orientations[$i]) {$pieces[$i]++}
         }
 #        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Red
 

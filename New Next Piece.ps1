@@ -1,4 +1,4 @@
-﻿# New indexing - not faster
+﻿# New Next Piece
 
 ###### Configureation Here ######
 
@@ -10,7 +10,7 @@ $solutions = [System.Collections.ArrayList]::new()
 
 # Sequence to begin with. Start with empty string to begin at the beginning.
 $startSequence = ''
-$startSequence = '25421 00111 21142'
+$startSequence = '2-421 0-111 2-142'
 
 # Dimensions of the box
 $boxXSize = 5
@@ -21,11 +21,7 @@ $boxZSize = 5
 $pieces = @(5, 6, 6)
 
 # The possible orientations for each piece. Must be in the same order as $pieces
-$orientations = @(
-    ,@('00111')
-    ,@('10223', '11232', '12322')
-    ,@('20124', '21142', '22214', '23241', '24412', '25421')
-)
+$orientations = @('0-111', '1-223', '1-232', '1-322', '2-124', '2-142', '2-214', '2-241', '2-412', '2-421')
 ###### End Configuration ######
 
 # Build the box
@@ -50,7 +46,7 @@ if ($sequence) {
     # Put it back
     $pieces[[int][string]$shape[0]]++
 } else {
-    $shape = $orientations[0][0]
+    $shape = $orientations[0]
 }
 
 # Sets all values in the box to 0
@@ -126,14 +122,11 @@ function Test-Sequence {
 }
 
 function Get-NextPiece ($p) {
-    [array]$availableOrientations = for ($i = 0; $i -lt $pieces.Count; $i++) {
-        if ($pieces[$i] -ne 0) {
-            $orientations[$i]
-        }
+    $nextIndex = $orientations.IndexOf($p) + 1
+    for ($i = $nextIndex; $i -lt $orientations.Length; $i++) {
+        $shape = $orientations[$i]
+        if ($pieces[[int][string]$shape[0]]) { return $shape }
     }
-
-    $nextPiece = $availableOrientations.IndexOf($p) + 1
-    $availableOrientations[$nextPiece]
 }
 
 $sw = [System.Diagnostics.Stopwatch]::new()
@@ -157,7 +150,7 @@ Get-Date; while ($shape) {
                     Date     = Get-Date
                 }
             ) | Out-Null
-            $solutions | Export-Csv -NoTypeInformation -Append -Encoding ASCII -Path .\solutions.csv
+            $solutions | Export-Csv -NoTypeInformation -Append -Encoding ASCII -Path .\solutions_new_next.csv
             Write-Host ("{0,3}{1,12}{2,4}{3,3} {4} {5}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' '), (Get-Date)) -ForegroundColor Green
             $sequence.RemoveAt($sequence.Count - 1)
         } else {
