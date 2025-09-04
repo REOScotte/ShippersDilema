@@ -1,4 +1,4 @@
-﻿# Working
+﻿# New Clear Box
 
 ###### Configuration Here ######
 
@@ -9,16 +9,7 @@
 $solutions = [System.Collections.ArrayList]::new()
 
 # Sequence to begin with. Start with empty string to begin at the beginning.
-#$startSequence = '241 223 124 322 111 412 232 124 111 111 232 223 412 322 111 111'
-#$startSequence = '241 223 142 223 214 111 111 111 241 111 214 223 111 232'
-#$startSequence = '111 111 111 111 111'
-#$startSequence = '111 421 142'
-#$startSequence = '111 412 241 322 223 124 124 111 232 223 232 111 322'
-#$startSequence = '111 421 142 232 223 214 214 322 111 223 111 322 232 142 111'
-#$startSequence = '111 421 142 232 223 214 214 322 111 223 111 322 232 142 111 421 111'
-#$startSequence = '111 421'
-#$startSequence = '111 421 142 223 223'
-#$startSequence = '421 111 142 223 232 214 322 214 111 223'
+$startSequence = ''
 $startSequence = '421 111 142'
 
 # Dimensions of the box
@@ -68,12 +59,9 @@ if ($sequence) {
 
 # Sets all values in the box to 0
 function Clear-Box {
-    0..($boxZSize - 1) | ForEach-Object {
-        $z = $_
-        0..($boxYSize - 1) | ForEach-Object {
-            $y = $_
-            0..($boxXSize - 1) | ForEach-Object {
-                $x = $_
+    for ($z = 0; $z -lt $boxZSize; $z++) {
+        for ($y = 0; $y -lt $boxYSize; $y++) {
+            for ($x = 0; $x -lt $boxXSize; $x++) {
                 $box[$x, $y, $z] = 0
             }
         }    

@@ -94,7 +94,7 @@ function Place-Piece ([string]$p, [string]$e) {
     return $true
 }
 
-# See if the current sequece will fit in a box, starting empty
+# See if the current sequence will fit in a box, starting empty
 function Test-Sequence {
     Clear-Box
     foreach ($piece in $sequence) {

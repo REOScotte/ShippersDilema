@@ -1,6 +1,6 @@
 ﻿# New indexing - not faster
 
-###### Configureation Here ######
+###### Configuration Here ######
 
 # Number of sequences tried
 [uint64]$counter = 0
@@ -114,7 +114,7 @@ function Place-Piece ([string]$p) {
     return $true
 }
 
-# See if the current sequece will fit in a box, starting empty
+# See if the current sequence will fit in a box, starting empty
 function Test-Sequence {
     Clear-Box
     foreach ($piece in $sequence) {
