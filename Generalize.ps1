@@ -1,9 +1,5 @@
 ﻿###### Configuration Here ######
 
-# Sequence to begin with. Start with empty string to begin at the beginning.
-$startSequence = ''
-#$startSequence = '421 111 142'
-
 # Dimensions of the box
 $Xsize = 5
 $Ysize = 5
@@ -13,10 +9,13 @@ $Zsize = 5
 $pieces = @(3, 1, 1, 13)
 $shapes = @('113', '122', '222', '124')
 
-###### End Configuration ######
+# Sequence to begin with. Start with empty string to begin at the beginning.
+$startSequence = ''
 
 # Number of sequences tried
 [uint64]$counter = 0
+
+###### End Configuration ######
 
 # Collection of solutions found
 $solutions = [System.Collections.ArrayList]::new()
@@ -149,32 +148,30 @@ Get-Date; while ($shape) {
     }
 
     if (Test-Sequence) {
-#        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Green
+#        Write-Host ("{0,7}{1,12}{2,$($pieces.Count + 1)}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Green
         if ($sequence.Count -eq $totalPieces) {
-            $solutions.Add(
-                [PSCustomObject]@{
-                    Sequence = $sequence -join ' '
-                    Counter  = $counter
-                    Date     = Get-Date
-                }
-            ) | Out-Null
-            $solutions | Export-Csv -NoTypeInformation -Append -Encoding ASCII -Path .\solutions.csv
-            Write-Host ("{0,3}{1,12}{2,4}{3,3} {4} {5}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' '), (Get-Date)) -ForegroundColor Green
+            $solution = [PSCustomObject]@{
+                Sequence = $sequence -join ' '
+                Counter  = $counter
+                Date     = Get-Date
+            }
+            $solutions.Add($solution) | Out-Null
+            $solution | Export-Csv -NoTypeInformation -Append -Encoding ASCII -Path .\solutions.csv
+            Write-Host ("{0,7}{1,12}{2,$($pieces.Count + 1)}{3,3} {4} {5}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' '), (Get-Date)) -ForegroundColor Green
             $sequence.RemoveAt($sequence.Count - 1)
         } else {
             $shape = '000'
         }
     } else {
-#        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Yellow
+#        Write-Host ("{0,7}{1,12}{2,$($pieces.Count + 1)}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Yellow
         $sequence.RemoveAt($sequence.Count - 1)
     }
-
     do {
         # Put it back
         for ($i = 0; $i -lt $orientations.Count; $i++) {
             if ($shape -in $orientations[$i]) {$pieces[$i]++}
         }
-#        Write-Host ("{0,3}{1,12}{2,4}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Red
+#        Write-Host ("{0,7}{1,12}{2,$($pieces.Count + 1)}{3,3} {4}" -f $solutions.Count, $counter, ($pieces -join ''), $sequence.count, ($sequence -join ' ')) -ForegroundColor Red
 
         [array]$availableOrientations = for ($i = 0; $i -lt $pieces.Count; $i++) {
             if ($pieces[$i]) {

@@ -100,7 +100,8 @@ function Test-Sequence {
     foreach ($piece in $sequence) {
         Backup-Box
 
-        $shape, $empty = $piece.Split('@')
+        $shape = $piece
+        $empty = (Get-NextEmptyCoordinates) -join ''
         if (-not (Place-Piece $shape $empty)) {
             Show-Box
             Read-Host $piece
@@ -112,26 +113,6 @@ function Test-Sequence {
     return $true
 }
 
-$sequence = @(
-'223@232'
-'223@100'
-'322@213'
-'322@020'
-'232@301'
-'232@022'
-'124@000'
-'241@300'
-'412@040'
-'124@431'
-'241@014'
-'412@103'
-'111@113'
-'111@222'
-'111@004'
-'111@440'
-'111@331'
-)
+$sequence = '113 142 241 142 142 214 214 241 241 241 142 412 142 131 212 222 241 311'.Split(' ')
 
 Test-Sequence
-
-#113 142 142 142 142 124 124 214 214 241 241 412 142 131 212 222 241 311
